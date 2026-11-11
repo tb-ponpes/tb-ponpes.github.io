@@ -136,3 +136,10 @@ function doDelete(e) {
     return jsonResponse({ success: false, error: err.message || "Unknown error" });
   }
 }
+
+// ---------- CORS preflight ----------
+// fetch() dengan Content-Type: application/json memicu permintaan CORS preflight (OPTIONS) sebelum POST.
+// Handler ini agar preflight lolos, lalu POST asli bisa dikirim.
+function doOptions(e) {
+  return ContentService.createTextOutput("").setMimeType(ContentService.MimeType.JSON);
+}
