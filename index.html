@@ -1,41 +1,116 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Website Khizanatullah</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #0d1117;
-            color: #c9d1d9;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-        }
-        .container {
-            text-align: center;
-            background: #161b22;
-            padding: 40px;
-            border-radius: 8px;
-            border: 1px solid #30363d;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
-        }
-        h1 {
-            color: #58a6ff;
-            margin-bottom: 10px;
-        }
-        p {
-            color: #8b949e;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Input Data Pemesanan</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-    <div class="container">
-        <h1>Selamat Datang di Website Saya!</h1>
-        <p>Halaman GitHub Pages berhasil online dan aktif.</p>
-    </div>
+  <div class="app">
+    <header class="app-header">
+      <h1>📦 Input Data Pemesanan</h1>
+      <p class="subtitle">Isi formulir di bawah untuk mencatat pesanan baru</p>
+    </header>
+
+    <!-- ---------- FORM ---------- -->
+    <section class="card form-card">
+      <h2 class="card-title">✏️ Data Baru</h2>
+      <form id="form" autocomplete="off">
+        <div class="grid">
+          <div class="field">
+            <label for="f-pemesan">Pemesan</label>
+            <input id="f-pemesan" name="PELANGGAN" type="text" placeholder="Nama pemesan" required />
+          </div>
+          <div class="field">
+            <label for="f-tgl-pesan">Tanggal Pemesan</label>
+            <input id="f-tgl-pesan" name="TANGGAL PESAN" type="date" />
+          </div>
+          <div class="field">
+            <label for="f-barang">Nama Barang</label>
+            <input id="f-barang" name="NAMA BARANG" type="text" placeholder="Contoh: Tamba Talang" required />
+          </div>
+          <div class="field">
+            <label for="f-qty">Qty</label>
+            <input id="f-qty" name="QTY" type="number" min="1" step="1" placeholder="Jumlah" required />
+          </div>
+          <div class="field">
+            <label for="f-satuan">Satuan</label>
+            <input id="f-satuan" name="SATUAN" type="text" list="satuan-list" placeholder="Unit" />
+            <datalist id="satuan-list">
+              <option value="PCS"></option>
+              <option value="BTG"></option>
+              <option value="KG"></option>
+              <option value="M"></option>
+              <option value="L"></option>
+              <option value="ML"></option>
+            </datalist>
+          </div>
+          <div class="field">
+            <label for="f-status">Status Kirim</label>
+            <select id="f-status" name="STATUS KIRIM">
+              <option value="BELUM">BELUM</option>
+              <option value="SIAP">SIAP</option>
+              <option value="KIRIM">KIRIM</option>
+              <option value="SELESAI">SELESAI</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="f-tgl-kirim">Tanggal Kirim</label>
+            <input id="f-tgl-kirim" name="TANGGAL KIRIM" type="date" />
+          </div>
+          <div class="field full">
+            <label for="f-ket">Keterangan</label>
+            <input id="f-ket" name="KETERANGAN" type="text" placeholder="Catatan opsional" />
+          </div>
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary" id="btn-simpan">
+            <span class="spinner" hidden></span>
+            <span class="btn-text">Simpan</span>
+          </button>
+          <button type="button" class="btn btn-secondary" id="btn-reset">Reset</button>
+        </div>
+        <p class="form-msg" id="form-msg"></p>
+      </form>
+    </section>
+
+    <!-- ---------- DATA TABLE ---------- -->
+    <section class="card">
+      <div class="card-header">
+        <h2 class="card-title">📋 Data Pemesanan</h2>
+        <span class="card-count" id="row-count">0 data</span>
+      </div>
+      <div class="table-wrapper">
+        <table id="data-table">
+          <thead>
+            <tr>
+              <th>No</th>
+              <th>Pemesan</th>
+              <th>Nama Barang</th>
+              <th>Qty</th>
+              <th>Satuan</th>
+              <th>Status Kirim</th>
+              <th>Tanggal Kirim</th>
+              <th>Keterangan</th>
+              <th class="th-actions">Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="table-body">
+            <tr>
+              <td colspan="9" class="empty">Belum ada data. Isi formulir di atas untuk memulai.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="table-msg" id="table-msg"></p>
+    </section>
+
+    <footer>
+      <p>Data tersimpan di Google Sheets. Halaman statis (GitHub Pages).</p>
+    </footer>
+  </div>
+
+  <script src="app.js"></script>
 </body>
 </html>
