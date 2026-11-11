@@ -1,7 +1,7 @@
 // ============ CONFIG ============
 // GANTI dengan URL Web App dari Google Apps Script (lihat README)
 const CONFIG = {
-  scriptUrl: "https://script.google.com/macros/s/AKfycby_z16UF6cSuqxTBHd1lBJBi2Cks_nQxBapE-447u_qN5Ag7A9ghdkJEVFd4fvJlETmGA/exec",
+  scriptUrl: "https://script.google.com/macros/s/AKfycbzK2BtRoXy93UHvJjBTQGyCYy-hVsmouf3B2l2hnypSGk_VUY5_tCiYxruxNYDsxz4Onw/exec",
   sheetName: "Sheet1",
   columns: [
     "PELANGGAN",
