@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Struk Invoice #100 - BanKid Parabola & CCTV</title>
+    <!-- Menggunakan Tailwind CSS untuk tata letak antarmuka layar (non-print) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Pengaturan dasar font struk kasir / monospace kontras tinggi */
+        .receipt-font {
+            font-family: 'Courier New', Courier, 'Lucida Console', Monaco, monospace;
+            color: #000000;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        /* Lebar area kertas termal 58mm (area efektif cetak biasanya 48mm - 54mm) */
+        .thermal-paper {
+            width: 58mm;
+            max-width: 58mm;
+            padding: 3mm 2.5mm;
+            background-color: #ffffff;
+            box-sizing: border-box;
+            line-height: 1.25;
+            font-size: 11px;
+        }
+
+        /* Garis pemisah khas struk kasir */
+        .divider-dashed {
+            border-top: 1px dashed #000000;
+            margin: 5px 0;
+        }
+
+        .divider-double {
+            border-top: 2px solid #000000;
+            border-bottom: 1px solid #000000;
+            height: 2px;
+            margin: 6px 0;
+        }
+
+        /* Aturan khusus saat dicetak menggunakan printer termal 58mm */
+        @media print {
+            @page {
+                size: 58mm auto;
+                margin: 0;
+            }
+
+            html, body {
+                width: 58mm;
+                margin: 0 !important;
+                padding: 0 !important;
+                background: #ffffff !important;
+            }
+
+            /* Sembunyikan elemen tombol kontrol dan latar belakang preview */
+            .no-print {
+                display: none !important;
+            }
+
+            .preview-wrapper {
+                padding: 0 !important;
+                margin: 0 !important;
+                background: none !important;
+                box-shadow: none !important;
+                display: block !important;
+            }
+
+            .thermal-paper {
+                width: 58mm !important;
+                max-width: 58mm !important;
+                padding: 2mm 2mm 6mm 2mm !important;
+                margin: 0 !important;
+                box-shadow: none !important;
+                border: none !important;
+            }
+        }
+    </style>
+</head>
+<body class="bg-slate-200 min-h-screen flex flex-col items-center py-6 px-4">
+
+    <!-- Panel Kontrol Layar (Tersembunyi saat Print) -->
+    <div class="no-print w-full max-w-md bg-white rounded-xl shadow-md p-4 mb-6 border border-slate-300">
+        <div class="flex items-center justify-between mb-3">
+            <div>
+                <h1 class="text-base font-bold text-slate-800">Preview Struk Termal 58mm</h1>
+                <p class="text-xs text-slate-500">Siap cetak untuk printer Bluetooth / USB 58mm</p>
+            </div>
+            <span class="px-2.5 py-1 text-xs font-semibold bg-emerald-100 text-emerald-800 rounded-full">
+                58mm Ready
+            </span>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+            <!-- Tombol Cetak Struk -->
+            <button onclick="printReceipt()" class="flex items-center justify-center gap-2 bg-slate-900 hover:bg-slate-800 active:scale-95 text-white font-semibold py-2.5 px-4 rounded-lg text-sm transition cursor-pointer shadow-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                </svg>
+                Cetak Struk
+            </button>
+
+            <!-- Tombol Unduh File .HTML -->
+            <button onclick="downloadHTML()" class="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-semibold py-2.5 px-4 rounded-lg text-sm transition cursor-pointer shadow-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg>
+                Unduh File .HTML
+            </button>
+        </div>
+
+        <!-- Notifikasi status unduhan -->
+        <div id="statusToast" class="hidden mt-3 text-center text-xs font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg py-1.5 px-3">
+            File struk-invoice-100.html berhasil diunduh!
+        </div>
+    </div>
+
+    <!-- Container Preview Kertas Struk -->
+    <div class="preview-wrapper flex justify-center">
+        <!-- Area Cetak Termal 58mm -->
+        <div id="receiptArea" class="thermal-paper receipt-font shadow-xl border border-slate-300">
+            
+            <!-- HEADER TOKO -->
+            <div class="text-center">
+                <div class="font-bold text-[14px] tracking-tight uppercase">BanKid</div>
+                <div class="font-bold text-[12px] uppercase">Parabola &amp; CCTV</div>
+                <div class="text-[10px] font-bold mt-0.5">(Bankid CCTV)</div>
+                <div class="text-[10px] mt-1 font-bold">Telp/WA: 085257554234</div>
+                <div class="text-[9.5px] mt-0.5 leading-tight">
+                    Perum Citra Jaya Tundungan, Sroyo, Jaten, Karanganyar
+                </div>
+            </div>
+
+            <div class="divider-double"></div>
+
+            <!-- JUDUL INVOICE -->
+            <div class="text-center font-bold text-[13px] tracking-widest my-1">
+                INVOICE
+            </div>
+
+            <div class="divider-dashed"></div>
+
+            <!-- INFO TRANSAKSI -->
+            <div class="text-[10px] space-y-0.5">
+                <div class="flex justify-between">
+                    <span>No. Invoice</span>
+                    <span class="font-bold">: #100</span>
+                </div>
+                <div class="flex justify-between">
+                    <span>Tanggal</span>
+                    <span>: 19/10/2026</span>
+                </div>
+                <div class="flex justify-between">
+                    <span>Jatuh Tempo</span>
+                    <span>: 19/10/2026</span>
+                </div>
+                <div class="pt-1">
+                    <div class="text-[9.5px]">Kepada (Bill To):</div>
+                    <div class="font-bold text-[11px] uppercase">MTA MOJOGEDANG 3</div>
+                </div>
+            </div>
+
+            <div class="divider-dashed"></div>
+
+            <!-- HEADER DAFTAR ITEM -->
+            <div class="flex justify-between font-bold text-[10px] uppercase">
+                <span>Deskripsi / Qty</span>
+                <span>Subtotal</span>
+            </div>
+
+            <div class="divider-dashed"></div>
+
+            <!-- DAFTAR ITEM (FORMAT KOMPAK 58MM) -->
+            <div class="space-y-2 text-[10.5px]">
+                <!-- Item 1 -->
+                <div>
+                    <div class="font-bold leading-snug">1. NVR HILOOK 8ch Upto 6MP</div>
+                    <div class="flex justify-between pl-2 text-[10px]">
+                        <span>1 x 1.300.000</span>
+                        <span class="font-bold">1.300.000</span>
+                    </div>
+                </div>
+
+                <!-- Item 2 -->
+                <div>
+                    <div class="font-bold leading-snug">2. HDD 1 TB</div>
+                    <div class="flex justify-between pl-2 text-[10px]">
+                        <span>1 x 700.000</span>
+                        <span class="font-bold">700.000</span>
+                    </div>
+                </div>
+
+                <!-- Item 3 -->
+                <div>
+                    <div class="font-bold leading-snug">3. Switch Poe 4 Port Hilook</div>
+                    <div class="flex justify-between pl-2 text-[10px]">
+                        <span>1 x 400.000</span>
+                        <span class="font-bold">400.000</span>
+                    </div>
+                </div>
+
+                <!-- Item 4 -->
+                <div>
+                    <div class="font-bold leading-snug">4. kamera IP Hilook 2MP + sound</div>
+                    <div class="flex justify-between pl-2 text-[10px]">
+                        <span>4 x 450.000</span>
+                        <span class="font-bold">1.800.000</span>
+                    </div>
+                </div>
+
+                <!-- Item 5 -->
+                <div>
+                    <div class="font-bold leading-snug">5. kabel LAN CAT 6</div>
+                    <div class="flex justify-between pl-2 text-[10px]">
+                        <span>70 x 5.000</span>
+                        <span class="font-bold">350.000</span>
+                    </div>
+                </div>
+
+                <!-- Item 6 -->
+                <div>
+                    <div class="font-bold leading-snug">6. Instalasi</div>
+                    <div class="flex justify-between pl-2 text-[10px]">
+                        <span>4 x 100.000</span>
+                        <span class="font-bold">400.000</span>
+                    </div>
+                </div>
+
+<!-- Item 6 -->
+                <div>
+                    <div class="font-bold leading-snug">7. Kabel NYM 2X1,5</div>
+                    <div class="flex justify-between pl-2 text-[10px]">
+                        <span>3 x 13.000</span>
+                        <span class="font-bold">39.000</span>
+                    </div>
+                </div>
+
+<!-- Item 6 -->
+                <div>
+                    <div class="font-bold leading-snug">8. Stop kontak lubang 3</div>
+                    <div class="flex justify-between pl-2 text-[10px]">
+                        <span>1 x 35.000</span>
+                        <span class="font-bold">35.000</span>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="divider-double"></div>
+
+            <!-- TOTAL PEMBAYARAN -->
+            <div class="flex justify-between items-center font-bold text-[12px] py-0.5">
+                <span>TOTAL</span>
+                <span>Rp 4.950.000</span>
+            </div>
+
+            <div class="divider-dashed"></div>
+
+            <!-- CATATAN / SYARAT & KETENTUAN -->
+            <div class="text-[9.5px] mt-1">
+                <div class="font-bold uppercase underline mb-0.5">Syarat &amp; Ketentuan:</div>
+                <div>- Garansi pemasangan 1 bulan</div>
+                <div>- Garansi Unit 1 Th</div>
+            </div>
+
+            <div class="divider-dashed"></div>
+
+            <!-- FOOTER STRUK -->
+            <div class="text-center mt-2 pt-1">
+                <div class="font-bold text-[11px]">Terima Kasih</div>
+                <div class="font-bold text-[10px] tracking-wide">Thank You</div>
+                <div class="text-[9px] mt-2">================================</div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        /**
+         * Memicu dialog cetak browser yang sudah dioptimalkan untuk kertas termal 58mm
+         */
+        function printReceipt() {
+            window.print();
+        }
+
+        /**
+         * Mengunduh halaman HTML utuh sebagai file .html ke perangkat pengguna
+         */
+        function downloadHTML() {
+            try {
+                // Ambil seluruh konten HTML dokumen saat ini
+                const htmlContent = "<!DOCTYPE html>\n" + document.documentElement.outerHTML;
+                const blob = new Blob([htmlContent], { type: "text/html;charset=utf-8" });
+                const url = URL.createObjectURL(blob);
+
+                // Buat elemen anchor sementara untuk memicu download
+                const downloadLink = document.createElement("a");
+                downloadLink.href = url;
+                downloadLink.download = "struk-invoice-100-58mm.html";
+                document.body.appendChild(downloadLink);
+                downloadLink.click();
+                document.body.removeChild(downloadLink);
+
+                // Bersihkan object URL
+                setTimeout(() => URL.revokeObjectURL(url), 1000);
+
+                // Tampilkan pesan sukses tanpa menggunakan alert()
+                const toast = document.getElementById("statusToast");
+                toast.classList.remove("hidden");
+                setTimeout(() => {
+                    toast.classList.add("hidden");
+                }, 3500);
+            } catch (error) {
+                console.error("Gagal mengunduh file HTML:", error);
+            }
+        }
+    </script>
+</body>
+</html>
